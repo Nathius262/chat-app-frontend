@@ -1,0 +1,125 @@
+:root{
+    --background:rgb(51, 51, 51);
+    --background-inner:linear-gradient( rgb(224, 158, 37) 30%, rgb(166, 92, 7));
+    --height:800px;
+    --margin-top:100px;
+    --grey:rgb(255, 255, 255);
+    --black:black;
+    --trans-dark:rgba(44, 44, 44, 0.316);
+    --white:white;
+}
+
+body{
+    background:var(--background);
+}
+#col1{
+    height: var(--height);
+    margin-top: var(--margin-top);
+    background: var(--background-inner);
+}
+#search-input{
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#search span{
+    border-bottom-right-radius: 6px;
+    height: auto;
+    padding: 10px;
+    margin: 0;
+}
+.list-img{
+    color: var(--grey);
+}
+#profile2{
+    background-color: var(--trans-dark)
+}
+.img-profile{    
+    background: rgb(67, 67, 67);
+    background-image: url('img/default.png');
+    background-size: cover;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    border: 1px solid grey;
+    margin-right: 13px;
+}
+
+
+
+#col2{
+    background: var(--background-inner);
+    height: var(--height);
+    margin-top: var(--margin-top);
+}
+
+#col2 nav{
+    background-color: var(--trans-dark);
+    border-top: 0.1px solid var(--trans-dark);
+    padding-bottom: 4px;
+    padding-left: 20px;
+}
+.message-body{
+    width:100%;
+    height: 65%;
+    overflow-y: scroll;
+}
+.message-body .img-profile{
+    height: 50px;
+    width: 50px;
+    margin-left: 13px;
+}
+.message-body ul{
+    display: grid;
+}
+.message-body ul .list-img{
+    color: var(--white);
+}
+.message-body ul p{
+    max-width: 300px;
+}
+.message-body ul .sender{
+    justify-self: end;
+}
+.message-body ul .receiver{
+    justify-self: start;    
+}
+
+.message-text-receiver{
+    background-color: rgb(20, 92, 92);
+    padding: 8px;
+    border-radius: 20px;
+}
+.message-text-sender{
+    background-color: rgb(0, 171, 120);
+    padding: 8px;
+    border-radius: 20px;
+}
+.message{
+    margin-top: 30px;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+#message{
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    
+}
+.message button{
+    border: none;
+    border-bottom-right-radius: 6px;
+    height: auto;
+    padding: 10px;
+    margin: 0;
+}
+
+#modalLogin{
+    
+    color: var(--white);
+}
+.modal-content{
+    background:var(--background-inner);
+    color: var(--black);
+}
