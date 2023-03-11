@@ -1,7 +1,7 @@
-import { Navbar } from "./component/Navbar.js";
+import { Navbar, SidebarNavbar } from "./component/Navbar.js";
 import { MessageBody, MessageSubmit } from "./component/Message.js";
 import {Chat} from "./component/Chat.js";
-import { Login, MustAuthenticate } from "./component/Login.js";
+import { Login, MustAuthenticate, Signup} from "./component/Authentication.js";
 
 // // fuction of a query selector
 // function $(attribute){    
@@ -11,7 +11,15 @@ import { Login, MustAuthenticate } from "./component/Login.js";
 
 
 let root = document.getElementById('root')
-let is_authenticated = false
+let i;
+let is_authenticated
+const endpoint = "http://127.0.0.1:8000/api/"
+
+if(localStorage.getItem('access')){
+    is_authenticated =true
+}else{
+    is_authenticated = false
+}
 
 if (is_authenticated){
     isAuthenticated()
@@ -19,30 +27,153 @@ if (is_authenticated){
     isNotAuthenticated()
 }
 
-let login = document.querySelector('#loginForm')
-Array.from(login).forEach(form => {
-    login.addEventListener('submit', event => {
-        event.preventDefault()
-        let loginForm = form
-        console.log(loginForm);
-    })
-})
-
 function isAuthenticated(){    
     root.innerHTML = Chat()
 
+    let introChat = document.getElementById('col2')
+    introChat.innerHTML = `
+        <div id="intro-chat">
+            <div>                
+                <h1>Glory Chat</h1>
+                <p>chat with your friends and all your loved ones</p>
+            </div>
+        </div>
+    `
+
+    let sidebarNav = document.getElementById('sidbar-nav')
+    sidebarNav.innerHTML = SidebarNavbar()
+
+    let listImg = document.getElementsByClassName('friend-item')
+
+    for (i=0;i<listImg.length;i++){
+        
+        let listObj =listImg[i] 
+        listImg[i].classList.remove('active')
+        listObj.addEventListener("click", () =>{
+            for (i of listImg) {
+                i.classList.remove("active")
+            }
+            listObj.classList.add('active')
+            chat()
+        })
+    }
+    
+    
+    dropDown()
+}
+
+function chat(){
+    let introChat = document.getElementById('col2')
+    introChat.innerHTML = `
+        <nav id="nav">                    
+        </nav>
+        <div class="message-body container" id="message-body">
+            
+        </div>
+
+        <div class="message d-flex container p-4" id="message-submit">                    
+        </div>
+    `
     let navbar = document.getElementById('nav')
     navbar.innerHTML = Navbar()
-
+    
     let messageBody = document.getElementById('message-body')
     messageBody.innerHTML = MessageBody()
 
     let messageSubmit = document.getElementById('message-submit')
-    messageSubmit.innerHTML = MessageSubmit()  
+    messageSubmit.innerHTML = MessageSubmit() 
 }
 
-function isNotAuthenticated(){
-    root.innerHTML  = Login()
-    let showModal = document.getElementById('modalLogin')
-    showModal.style.display = "block"
+function isNotAuthenticated(signup){    
+    
+    if(signup){
+        root.innerHTML = Signup()
+        let showSignupModal = document.getElementById('modalSign')
+        showSignupModal.style.display = "block"
+    }else{
+        root.innerHTML  = Login()
+        let showLoginModal = document.getElementById('modalLogin')
+        showLoginModal.style.display = "block" 
+    }
+
+    const authenticate = document.querySelectorAll('.needs-validation')
+    
+    Array.from(authenticate).forEach(login => {
+
+        login.addEventListener('submit', event => {
+            event.preventDefault()
+            if (!login.checkValidity()){
+                event.stopPropagation()
+                login.classList.add('was-validated')
+            }else{
+                let loginForm = new FormData(login)
+                let loginObj = Object.fromEntries(loginForm)
+                document.querySelector('#loginForm') ? handleAuthentication(loginObj, "auth/login/") : handleAuthentication(loginObj, "auth/signup/")
+            }
+            
+    
+        })
+    })
+
+    const signupClick = document.getElementById('signupClick')
+    signupClick.addEventListener('click', () => {
+        isNotAuthenticated(true)
+    })
+    
+}
+
+function dropDown(){
+    const dropdown04 = document.querySelector('#dropdown04')
+    dropdown04.addEventListener("click", (e) => {
+        e.preventDefault()
+        let dropdown = document.querySelector('#dropdown')
+        dropdown.classList.toggle("show")
+        dropdown04.classList.toggle("show")
+        if (dropdown04.ariaExpanded === "false"){
+            dropdown04.ariaExpanded = true
+        }else{
+            dropdown04.ariaExpanded = false
+        }
+    })
+
+    window.onclick = event => {
+        if (!event.target.matches('#dropdown04')){
+            let dropdown_menu =  document.getElementsByClassName('dropdown-menu')
+            for (let i=0; i<dropdown_menu.length; i++){
+                if (dropdown_menu[i].classList.contains('show')){
+                    dropdown_menu[i].classList.remove('show')
+                    dropdown04.ariaExpanded = true
+                    dropdown04.classList.toggle("show")
+                }
+            }
+        }
+    }
+}
+
+
+function handleAuthentication(obj, url){
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body:JSON.stringify(obj)
+    }
+    let to_url = endpoint+url
+    fetch(to_url, options) //promise
+    .then(response => {
+        return response.json()
+    })
+    .then(data => {
+        if(data.non_field_errors){
+            console.log(data.non_field_errors)
+        }
+        localStorage.setItem('access', data.access_token)
+        localStorage.setItem('refresh', data.refresh_token)
+        is_authenticated = true
+        isAuthenticated()
+    })
+    .catch(error => {
+        console.log('error', error)
+    })
 }
