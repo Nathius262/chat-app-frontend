@@ -14,6 +14,85 @@ let root = document.getElementById('root')
 let i;
 let is_authenticated
 const endpoint = "http://127.0.0.1:8000/api/"
+let options = {
+    method: "GET",
+    headers: {
+        "Content-Type":"application/json",
+    }
+}
+
+let access = localStorage.getItem('access')
+//fetchMessageData()
+function fetchMessageData(){
+    
+    let to_url = endpoint+"chat"
+    options.headers['Authorization'] = `BEARER ${access}`
+    fetch(to_url, options)
+    .then(response => {
+        let jsonResonse = response.json()
+        return jsonResonse
+    })
+    .then(data => {
+        if(data.code === "token_not_valid"){
+            verifyToken(access)
+            fetchMessageData()
+        }else{
+            // Array.from(data).forEach(obj => {
+            //     console.log(obj.receiver.picture);
+            // })
+        }
+    })
+    .catch(error => {
+        console.log(error);
+    })
+    
+}
+
+function verifyToken(token){
+    let url_endpoint = endpoint+"auth/token/verify/"
+    options.method = "POST"
+    let data = {'token': token}
+    options.body = JSON.stringify(data)
+    fetch(url_endpoint, options)
+    .then(response => {
+        return response.json()
+    }).then(data => {
+
+        if(data.code === "token_not_valid"){
+            let refresh =localStorage.getItem('refresh')
+            refreshToken(refresh)
+        }
+
+    }).catch(error =>{
+        console.log(error)
+    })
+}
+
+function refreshToken(refresh_token){
+    console.log("refreshing token")
+    let url_endpoint = endpoint+"auth/token/refresh/"
+    options.method= "POST"
+    let data = {'refresh': refresh_token}
+    options.body = JSON.stringify(data)
+    fetch(url_endpoint, options).then(response =>{
+        return response.json()
+    }).then(data =>{
+
+        if(data.code === "token_not_valid"){
+            console.log("please login again!");
+            localStorage.removeItem('access')
+            localStorage.removeItem('refresh')
+            is_authenticated = false
+            isNotAuthenticated()
+        }else if (data.access){
+            console.log(data)
+            localStorage['access'] = data.access
+        }
+        
+    }).catch(error =>{
+        console.log(error)
+    })
+}
 
 if(localStorage.getItem('access')){
     is_authenticated =true
@@ -32,10 +111,10 @@ function isAuthenticated(){
 
     let introChat = document.getElementById('col2')
     introChat.innerHTML = `
-        <div id="intro-chat">
+        <div id="intro-chat" class="">
             <div>                
-                <h1>Glory Chat</h1>
-                <p>chat with your friends and all your loved ones</p>
+                <h1 class="h1 fw-bolder">Glory Chat</h1>
+                <p class="fw-bold">chat with your friends and all your loved ones</p>
             </div>
         </div>
     `
@@ -96,8 +175,8 @@ function isNotAuthenticated(signup){
         showLoginModal.style.display = "block" 
     }
 
+    // validate signup and login form before posting a request
     const authenticate = document.querySelectorAll('.needs-validation')
-    
     Array.from(authenticate).forEach(login => {
 
         login.addEventListener('submit', event => {

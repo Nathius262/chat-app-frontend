@@ -1,4 +1,5 @@
 function Chat(){
+
     let chathtml = `
         <div class="row">
             <div class="col-md-4 container py-3" id="col1">
@@ -32,7 +33,7 @@ function Chat(){
                     
                 </div>
 
-                <div class="message d-flex container p-4" id="message-submit">                    
+                <div class="message d-flex p-4" id="message-submit">                    
                 </div>
             </div>
         </div>
