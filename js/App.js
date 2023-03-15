@@ -1,7 +1,6 @@
-import { Navbar, SidebarNavbar } from "./component/Navbar.js";
-import { MessageBody, MessageSubmit } from "./component/Message.js";
+import { MessageBody } from "./component/Message.js";
 import {Chat} from "./component/Chat.js";
-import { Login, MustAuthenticate, Signup} from "./component/Authentication.js";
+import { Login, Signup} from "./component/Authentication.js";
 
 // // fuction of a query selector
 // function $(attribute){    
@@ -22,10 +21,10 @@ let options = {
 }
 
 let access = localStorage.getItem('access')
-//fetchMessageData()
+let counter = 0;
 function fetchMessageData(){
     
-    let to_url = endpoint+"chat"
+    let to_url = endpoint+"chat/"
     options.headers['Authorization'] = `BEARER ${access}`
     fetch(to_url, options)
     .then(response => {
@@ -34,12 +33,22 @@ function fetchMessageData(){
     })
     .then(data => {
         if(data.code === "token_not_valid"){
-            verifyToken(access)
-            fetchMessageData()
+            
+            if (counter < 5){
+                verifyToken(access)
+                fetchMessageData()
+            }else{
+                is_authenticated = false
+                isNotAuthenticated()
+                
+            }
+            counter +=1
+            console.log(counter)
         }else{
             // Array.from(data).forEach(obj => {
             //     console.log(obj.receiver.picture);
             // })
+            htmlData(data)
         }
     })
     .catch(error => {
@@ -49,6 +58,7 @@ function fetchMessageData(){
 }
 
 function verifyToken(token){
+    console.log("verifying token...")
     let url_endpoint = endpoint+"auth/token/verify/"
     options.method = "POST"
     let data = {'token': token}
@@ -69,7 +79,7 @@ function verifyToken(token){
 }
 
 function refreshToken(refresh_token){
-    console.log("refreshing token")
+    console.log("refreshing token...")
     let url_endpoint = endpoint+"auth/token/refresh/"
     options.method= "POST"
     let data = {'refresh': refresh_token}
@@ -106,24 +116,15 @@ if (is_authenticated){
     isNotAuthenticated()
 }
 
-function isAuthenticated(){    
-    root.innerHTML = Chat()
+function isAuthenticated(){
+    fetchMessageData()    
+}
 
-    let introChat = document.getElementById('col2')
-    introChat.innerHTML = `
-        <div id="intro-chat" class="">
-            <div>                
-                <h1 class="h1 fw-bolder">Glory Chat</h1>
-                <p class="fw-bold">chat with your friends and all your loved ones</p>
-            </div>
-        </div>
-    `
+function htmlData(data){
+    root.innerHTML = `${Chat(data)}`
 
-    let sidebarNav = document.getElementById('sidbar-nav')
-    sidebarNav.innerHTML = SidebarNavbar()
-
+    // eventlistener when a recent chat is clicked
     let listImg = document.getElementsByClassName('friend-item')
-
     for (i=0;i<listImg.length;i++){
         
         let listObj =listImg[i] 
@@ -133,34 +134,38 @@ function isAuthenticated(){
                 i.classList.remove("active")
             }
             listObj.classList.add('active')
-            chat()
+            document.getElementById('col2').innerHTML = MessageBody(data)
         })
     }
-    
-    
     dropDown()
 }
 
-function chat(){
-    let introChat = document.getElementById('col2')
-    introChat.innerHTML = `
-        <nav id="nav">                    
-        </nav>
-        <div class="message-body container" id="message-body">
-            
-        </div>
+function dropDown(){
+    const dropdown04 = document.querySelector('#dropdown04')
+    dropdown04.addEventListener("click", (e) => {
+        e.preventDefault()
+        let dropdown = document.querySelector('#dropdown')
+        dropdown.classList.toggle("show")
+        dropdown04.classList.toggle("show")
+        if (dropdown04.ariaExpanded === "false"){
+            dropdown04.ariaExpanded = true
+        }else{
+            dropdown04.ariaExpanded = false
+        }
+    })
 
-        <div class="message d-flex container p-4" id="message-submit">                    
-        </div>
-    `
-    let navbar = document.getElementById('nav')
-    navbar.innerHTML = Navbar()
-    
-    let messageBody = document.getElementById('message-body')
-    messageBody.innerHTML = MessageBody()
-
-    let messageSubmit = document.getElementById('message-submit')
-    messageSubmit.innerHTML = MessageSubmit() 
+    window.onclick = event => {
+        if (!event.target.matches('#dropdown04')){
+            let dropdown_menu =  document.getElementsByClassName('dropdown-menu')
+            for (let i=0; i<dropdown_menu.length; i++){
+                if (dropdown_menu[i].classList.contains('show')){
+                    dropdown_menu[i].classList.remove('show')
+                    dropdown04.ariaExpanded = true
+                    dropdown04.classList.toggle("show")
+                }
+            }
+        }
+    }
 }
 
 function isNotAuthenticated(signup){    
@@ -200,35 +205,6 @@ function isNotAuthenticated(signup){
     })
     
 }
-
-function dropDown(){
-    const dropdown04 = document.querySelector('#dropdown04')
-    dropdown04.addEventListener("click", (e) => {
-        e.preventDefault()
-        let dropdown = document.querySelector('#dropdown')
-        dropdown.classList.toggle("show")
-        dropdown04.classList.toggle("show")
-        if (dropdown04.ariaExpanded === "false"){
-            dropdown04.ariaExpanded = true
-        }else{
-            dropdown04.ariaExpanded = false
-        }
-    })
-
-    window.onclick = event => {
-        if (!event.target.matches('#dropdown04')){
-            let dropdown_menu =  document.getElementsByClassName('dropdown-menu')
-            for (let i=0; i<dropdown_menu.length; i++){
-                if (dropdown_menu[i].classList.contains('show')){
-                    dropdown_menu[i].classList.remove('show')
-                    dropdown04.ariaExpanded = true
-                    dropdown04.classList.toggle("show")
-                }
-            }
-        }
-    }
-}
-
 
 function handleAuthentication(obj, url){
     const options = {
