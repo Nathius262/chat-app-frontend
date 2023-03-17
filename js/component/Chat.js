@@ -1,11 +1,11 @@
 import { SidebarNavbar } from "./Navbar.js"
 
-function Chat(data){
+function Chat(data, main_endpoint){
 
     let chathtml = `
         <div class="row">
             <div class="col-md-4 container py-3" id="col1">
-                ${SidebarNavbar(data)}
+                ${SidebarNavbar(data, main_endpoint)}
             </div>
             <div class="col container p-0" id="col2">
                 <div id="intro-chat" class="">
