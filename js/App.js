@@ -1,7 +1,7 @@
 import { MessageBody, messageBodyInner, MessageSubmit } from "./component/Message.js";
 import {Chat} from "./component/Chat.js";
 import { Login, Signup} from "./component/Authentication.js";
-
+import "./component/socket.js"
 // // fuction of a query selector
 // function $(attribute){    
 //     return (document.querySelector(attribute))
