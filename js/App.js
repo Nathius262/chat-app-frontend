@@ -1,4 +1,4 @@
-import { MessageBody } from "./component/Message.js";
+import { MessageBody, messageBodyInner, MessageSubmit } from "./component/Message.js";
 import {Chat} from "./component/Chat.js";
 import { Login, Signup} from "./component/Authentication.js";
 
@@ -35,7 +35,6 @@ function fetchMessageData(){
     .then(data => {
         if(data.code === "token_not_valid"){            
             verifyToken(access)
-            window.location.reload()
         }else{
             // Array.from(data).forEach(obj => {
             //     console.log(obj.receiver.picture);
@@ -87,8 +86,8 @@ function refreshToken(refresh_token){
             is_authenticated = false
             isNotAuthenticated()
         }else if (data.access){
-            console.log(data)
             localStorage['access'] = data.access
+            window.location.reload()
         }
         
     }).catch(error =>{
@@ -109,14 +108,13 @@ if (is_authenticated){
 }
 
 function isAuthenticated(){
-    fetchMessageData()    
+    fetchMessageData()
 }
 
 function htmlData(data){
     root.innerHTML = `${Chat(data, main_endpoint)}`
 
     let friendList = document.querySelector('.friend-list')
-    console.log(data)
     for (let i=0; i<data.length; i++){
         let d = data[i]
 
@@ -141,69 +139,15 @@ function htmlData(data){
         listImg[i].classList.remove('active')
         listObj.addEventListener("click", () =>{
             let chatwith = listObj.dataset['objname']
+            let user = data[0].user.username
             for (i of listImg) {
                 i.classList.remove("active")
             }
             listObj.classList.add('active')
             document.getElementById('col2').innerHTML = MessageBody(data)
-            let messageBodyList = document.querySelector('#message-body-list')
-            for (let i=0; i<data.length; i++){
-                let d = data[i]
-                if (`${d.friend.username}` === `${chatwith}`){
-                    let friend_pix_url = main_endpoint+d.friend.picture
-                    let user_pix_url =main_endpoint+d.user.picture
-                    let obj;
-                    let sender = d.message_receiver
-                    for (let i=0; i<sender.length; i++){
-                        let friend = sender[i]
-                        if (`${friend.sender}` === `${chatwith}`){
-                            let nav = document.querySelector('#nav')
-                            nav.innerHTML = `
-                                <ul class="list-unstyled mt-4 d-flex justify-content-between container">
-                                <li class="list-img px-0 pt-3 pb-1 d-flex align-items-center">
-                                    <div style="background-image:url(${friend_pix_url});" class="img-profile"></div>
-                                    <p class="fs-4 fw-bold d-grid">
-                                        <span id="chat-with">Chat with ${chatwith}</span>
-                                        <span class="fs-6 fw-light">3 messages</span>
-                                    </p>
-                                </li>
-                                
-                            </ul>
-                            `
-                            obj = `
-                            <li class="receiver list-img px-0 pt-3 pb-1 pt-1 d-flex align-items-center">
-                                <div style="background-image:url(${friend_pix_url});" class="img-profile"></div>
-                                <div class="">
-                                    <p class="message-text-receiver shadow fs-4 fw-bold mb-0">${friend.message}</p>
-                                    <p class="fs-6 fw-light mt-0 px-2">30 Wed 15:12</p>
-                                </div>
-                                
-                            </li>
-                                `
-                        }
-                        if (`${friend.sender}` != `${chatwith}`){
-                            obj = `
-                            <li class="sender list-img px-0 pt-3 pb-1 pt-1 d-flex align-items-center">                            
-                                <div class="">
-                                    <p class="message-text-sender shadow fs-4 fw-bold mb-0">${friend.message}</p>
-                                    <p class="fs-6 fw-light mt-0 px-2">30 Wed 15:12</p>
-                                </div>
-                                <div style="background-image:url(${user_pix_url});" class="img-profile"></div>
-                                
-                            </li>
-                            `
-                        }
-                        messageBodyList.insertAdjacentHTML("afterbegin", obj)
-                    }
-                    
-                    
-                }
-        
-                
-                
-                
-                
-            }
+            MessageSubmit(api_endpoint, user, chatwith)
+            messageBodyInner(main_endpoint, data, chatwith)
+            
         })
     }
     dropDown()

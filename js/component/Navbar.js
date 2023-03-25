@@ -2,13 +2,15 @@ function SidebarNavbar(data, main_endpoint){
     
     let html_rep;
     Array.from(data).forEach(obj =>{
-        console.log(obj)
         let picture_url = main_endpoint+obj.user.picture
         html_rep = `
             <div id="sidbar-nav">
                 <ul class="list-unstyled mt-1 mb-3 d-flex justify-content-between align-items-center">
-                    <li class="list-img px-0 pt-3 pb-1">
+                    <li class="list-img px-0 pt-3 pb-1 d-inline-flex align-item-center justify-content-start">
                         <div style="background-image:url(${picture_url});" class="img-profile"></div>
+                        <div class="fs-4 align-self-center">
+                            ${obj.user.username}
+                        </div>
                     </li>
                     <li id="navIcon" class="list-img">
 
